@@ -1,58 +1,44 @@
-## Importing the libraries
 import numpy as np
 import pandas as pd
 import streamlit as st
 import plotly.express as px
 import pickle
 
-# Loading the model
-loaded_model = pickle.load(open('loan_classifier', 'rb'))
+# Load model
+loaded_model = pickle.load(open('diabetes_classifier', 'rb'))
 
-# Importing the dataset
+# Load dataset
 load = pd.read_csv('diabetes.csv')
 
-# Functions for the loan prediction
-def loan_prediction(input_data):
+# Prediction function
+def diabetes_prediction(input_data):
     input_data_as_numpy_array = np.asarray(input_data)
-    input_data_reshaped = input_data_as_numpy_array.reshape(1,-1)
+    input_data_reshaped = input_data_as_numpy_array.reshape(1, -1)
     prediction = loaded_model.predict(input_data_reshaped)
-    return 'Unfortunately, you are susceptible to diabetes.' if prediction[0] == 0 else 'Congratulations! You are not susceptible to diabetes.'
+    return (
+        'Unfortunately, you are susceptible to diabetes.'
+        if prediction[0] == 0
+        else 'Congratulations! You are not susceptible to diabetes.'
+    )
 
-    #Creating a count plot for gender
-def chart_page():
-    st.title('Loan Application by Gender')
-    count_gender=px.histogram(
-        load,
-        x = 'Gender',
-        color='Loan_Status',
-        title='Gender Status of Loan Applicants',
-        labels={'Loan_Status': 'Loan_Status'})
-    st.plotly_chart(count_gender)    ## To show the plot
-
-    # Adding some insights
-    st.subheader('Insights')
-    st.markdown('Men apply for ;oan more than women')
-
+# Dashboard page
 def dashboard_page():
-    st.title('Dashboard Page')
-    st.markdown('Input your values')
+    st.title('Diabetes Prediction Dashboard')
 
-    # Collecting the user inputs
-    col1, col2, col3 = st.columns(3)  ## To specify the number of columns
-    
+    col1, col2, col3 = st.columns(3)
     with col1:
-        Pregnancies= st.number_input('Pregnancies', value = 0)
-        Glucose= st.number_input('Glucose', value = 0)
-        BloodPressure= st.number_input('BloodPressure', value = 0)
-        SkinThickness= st.number_input('SkinThickness', value = 0)
+        Pregnancies = st.number_input('Pregnancies', value=0)
+        Glucose = st.number_input('Glucose', value=0)
+        BloodPressure = st.number_input('Blood Pressure', value=0)
+        SkinThickness = st.number_input('Skin Thickness', value=0)
 
     with col2:
-        Insulin= st.number_input('Insulin', value = 0)
-        BMI= st.number_input('LoanAmount', value = 0)
-        Age= st.number_input('LoanAmount', value = 0)
-        Age= st.number_input('LoanAmount', value = 0)
+        Insulin = st.number_input('Insulin', value=0)
+        BMI = st.number_input('BMI', value=0.0)
+        DiabetesPedigreeFunction = st.number_input('Diabetes Pedigree Function', value=0.0)
+        Age = st.number_input('Age', value=0)
 
-    if st.button('Diabetes Prediction System'):
+    if st.button('Predict Diabetes Risk'):
         try:
             input_data = [
                 int(Pregnancies),
@@ -63,23 +49,31 @@ def dashboard_page():
                 float(BMI),
                 float(DiabetesPedigreeFunction),
                 int(Age)
-        ]
+            ]
             result = diabetes_prediction(input_data)
             st.success(result)
-        except ValueError:
-            st.error('Enter a valid input')
 
-            # Function to switch tabs
+            # Optional: show extra insights
+            st.subheader('Insights')
+            st.markdown('Men are more susceptible to diabetes than women.')
+        except ValueError:
+            st.error('Enter valid input values')
+
+# Chart page
+def chart_page():
+    st.title('Diabetes Data Visualization')
+    fig = px.histogram(load, x='Age', color='Outcome', barmode='group')
+    st.plotly_chart(fig)
+
+# Main app
 def main():
     st.sidebar.title('Navigation')
     page = st.sidebar.selectbox('Select Page', ['Chart', 'Form Inputs'])
 
     if page == 'Chart':
         chart_page()
-    elif page=='Form Inputs':
+    elif page == 'Form Inputs':
         dashboard_page()
 
-# Run app
 if __name__ == '__main__':
     main()
-
