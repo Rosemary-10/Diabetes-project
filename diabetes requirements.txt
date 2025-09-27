@@ -3,6 +3,6 @@ pandas
 numpy
 matplotlib
 seaborn
-plotly.express
+plotly
 streamlit
 streamlit_option_menu
